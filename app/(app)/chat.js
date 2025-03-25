@@ -221,7 +221,13 @@ const ChatScreen = () => {
                       );
                 }}
               >
-                <Text style={{ fontSize: 16 }}>{msg.message}</Text>
+                <Text
+                  selectable={true}
+                  selectionColor={"skyblue"}
+                  style={{ fontSize: 16 }}
+                >
+                  {msg.message}
+                </Text>
               </Pressable>
             </View>
           );

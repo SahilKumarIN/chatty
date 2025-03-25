@@ -10,7 +10,7 @@ import {
 } from "firebase/auth";
 import { useRouter, useSegments } from "expo-router";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { doc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc, getDoc } from "firebase/firestore";
 
 export const AuthContext = createContext();
 
@@ -55,14 +55,22 @@ export const AuthProvider = ({ children }) => {
         password
       );
       const user = userCredential.user;
-      console.log(user);
+
+      // Extract username from email
+      const username = email.split("@")[0];
 
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
         mobileNumber: "",
         photoURL: "",
-        displayName: "",
+        displayName: username,
       });
+
+      // Update Firebase Auth display name
+      await updateProfile(user, { displayName: username });
+
+      // Update user state
+      setUser({ ...user, displayName: username });
     } catch (error) {
       Alert.alert("Sign Up Error", error.message);
     }
@@ -100,23 +108,23 @@ export const AuthProvider = ({ children }) => {
 
       const userRef = doc(db, "users", auth.currentUser.uid);
 
-      // Build the update object dynamically to avoid overwriting existing values
+      // Build the update object dynamically
       const updatedData = {};
       if (displayName) updatedData.displayName = displayName;
-      if (phoneNumber) updatedData.phoneNumber = phoneNumber;
+      if (phoneNumber) updatedData.mobileNumber = phoneNumber;
       if (photoURL) updatedData.photoURL = photoURL;
 
-      // Update Firestore first
+      // Update Firestore
       await updateDoc(userRef, updatedData);
       console.log("Firestore updated successfully!");
 
-      // Then update Authentication (optional)
+      // Update Firebase Auth
       await updateProfile(auth.currentUser, {
         displayName: updatedData.displayName || auth.currentUser.displayName,
         photoURL: updatedData.photoURL || auth.currentUser.photoURL,
       });
 
-      // Fetch the latest user data from Firestore and update state
+      // Fetch latest data and update state
       const userSnapshot = await getDoc(userRef);
       setUser({ id: auth.currentUser.uid, ...userSnapshot.data() });
 

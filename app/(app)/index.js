@@ -9,6 +9,7 @@ import {
   View,
   ActivityIndicator,
   Dimensions,
+  RefreshControl,
 } from "react-native";
 import React, { useContext, useState, useEffect } from "react";
 import { AppContext } from "../../context/AppContext";
@@ -33,34 +34,36 @@ const Index = () => {
   const [users, setUsers] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchUsers = async () => {
+    try {
+      if (!db) {
+        console.error("Firestore (db) is undefined!");
+        return;
+      }
+      setRefreshing(true);
+      const usersRef = collection(db, "users");
+      const querySnapshot = await getDocs(usersRef);
+      const userList = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      const userWithoutSelf = userList.filter(
+        (item) => String(item.email) !== String(user.email)
+      );
+
+      setUsers(userWithoutSelf);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        if (!db) {
-          console.error("Firestore (db) is undefined!");
-          return;
-        }
-
-        const usersRef = collection(db, "users");
-        const querySnapshot = await getDocs(usersRef);
-        const userList = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        const userWithoutSelf = userList.filter(
-          (item) => String(item.email) !== String(user.email)
-        );
-
-        setUsers(userWithoutSelf);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUsers();
   }, []);
 
@@ -140,7 +143,13 @@ const Index = () => {
           style={{ marginTop: 20 }}
         />
       ) : (
-        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={{ flex: 1 }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={fetchUsers} />
+          }
+        >
           {filteredUsers.length > 0 ? (
             filteredUsers.map((user) => (
               <Pressable
@@ -150,9 +159,7 @@ const Index = () => {
               >
                 {user?.photoURL ? (
                   <Image
-                    source={{
-                      uri: user?.photoURL,
-                    }}
+                    source={{ uri: user?.photoURL }}
                     style={styles.avatar}
                   />
                 ) : (

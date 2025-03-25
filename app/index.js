@@ -101,7 +101,7 @@ const Index = () => {
               activeOpacity={0.8}
               style={[styles.primaryButton, { zIndex: 999999 }]}
               onPress={() => {
-                router.push("/signIn");
+                router.replace("/signIn");
               }}
             >
               <Text style={styles.primaryButtonTxt}>{"Get Started"}</Text>
