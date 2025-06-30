@@ -22,6 +22,8 @@ import { AuthContext } from "../../context/AuthContext";
 import * as ImagePicker from "expo-image-picker";
 import { getAuth, updateProfile } from "firebase/auth";
 import BottomSheet from "../../components/BottomSheet";
+import { collection, doc, updateDoc } from "firebase/firestore";
+import { db } from "../../firebase.config";
 
 const Profile = () => {
   const router = useRouter();
@@ -126,11 +128,19 @@ const Profile = () => {
     try {
       const auth = getAuth();
       if (!auth.currentUser) throw new Error("No authenticated user found");
-
-      await updateProfile(auth.currentUser, { displayName, photoURL });
-
-      console.log("Profile updated successfully!");
-      Alert.alert("Success", "Profile updated successfully!");
+      const userRef = doc(db, "users", auth.currentUser.uid);
+      await updateDoc(userRef, {
+        photoURL,
+        displayName,
+      });
+      updateProfile(auth.currentUser, { displayName, photoURL })
+        .then(() => {
+          console.log("Profile updated successfully!");
+          Alert.alert("Success", "Profile updated successfully!");
+        })
+        .catch((err) => {
+          throw new Error(err);
+        });
     } catch (error) {
       console.error("Firebase update failed:", error);
       Alert.alert("Update Failed", error.message);

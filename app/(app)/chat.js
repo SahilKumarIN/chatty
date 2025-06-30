@@ -135,9 +135,9 @@ const ChatScreen = () => {
         >
           <AntDesign name="left" size={24} color="black" />
         </TouchableOpacity>
-        {receiverDetails?.profileImage ? (
+        {receiverDetails?.photoURL ? (
           <Image
-            source={{ uri: receiverDetails.profileImage }}
+            source={{ uri: receiverDetails.photoURL }}
             style={{ width: 40, height: 40, borderRadius: 20, marginRight: 10 }}
           />
         ) : (

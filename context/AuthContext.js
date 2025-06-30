@@ -7,6 +7,7 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   updateProfile,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { useRouter, useSegments } from "expo-router";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -142,9 +143,26 @@ export const AuthProvider = ({ children }) => {
     );
   }
 
+  const forgotPassword = async (email) => {
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        alert("Password Reset mail sent to:\n" + email);
+      })
+      .catch((err) => {
+        alert("An error occurred \n Please try again!!\n" + err);
+      });
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, signIn, signUp, logout, updateUserProfile }}
+      value={{
+        user,
+        signIn,
+        signUp,
+        logout,
+        updateUserProfile,
+        forgotPassword,
+      }}
     >
       {children}
     </AuthContext.Provider>

@@ -17,7 +17,7 @@ import { AuthContext } from "../context/AuthContext";
 
 const signIn = () => {
   const router = useRouter();
-  const { signIn } = useContext(AuthContext);
+  const { signIn, forgotPassword } = useContext(AuthContext);
   const [userDetails, setUserDetails] = useState({
     email: "",
     password: "",
@@ -95,6 +95,19 @@ const signIn = () => {
                   }}
                 />
               </View>
+              <Text
+                onPress={() => {
+                  forgotPassword(userDetails.email);
+                }}
+                style={{
+                  color: "#192f6a",
+                  fontWeight: "600",
+                  marginTop: 10,
+                  textAlign: "right",
+                }}
+              >
+                Forgot Password ?
+              </Text>
               <TouchableOpacity
                 style={styles.primaryButton}
                 onPress={() => {
@@ -103,6 +116,7 @@ const signIn = () => {
               >
                 <Text style={styles.primaryButtonTxt}>Sign In</Text>
               </TouchableOpacity>
+
               <Text
                 style={{ textAlign: "center", color: "gray", marginTop: 10 }}
               >

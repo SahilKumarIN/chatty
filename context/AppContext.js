@@ -22,6 +22,7 @@ export const AppProvider = ({ children }) => {
   const fetchUsers = async () => {
     const userList = auth.currentUser ? [auth.currentUser] : [];
     setUsers(userList);
+    console.log(userList);
   };
 
   useEffect(() => {
